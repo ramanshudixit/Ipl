@@ -41,4 +41,4 @@ In order to get the desired result, we need to do following transformations on t
     vi. sum(result) - for total_points
     vii. Ordered by year(asc), total_points(desc) and total_won(desc)
     
-  We had the desired result!
+  We have the desired result!
