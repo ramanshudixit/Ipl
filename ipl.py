@@ -13,7 +13,7 @@ data = sc.textFile('input.csv') \
                        result=l.split(",")[5].upper()))
 df = sp.createDataFrame(data)
 
-# removing those matches which are not yet played
+# removing those matches which are not yet played and knock out matches
 df = df.filter(df.result != '')
 df = df.filter(df.info.like('%MATCH%'))
 
@@ -84,7 +84,8 @@ final = sp.sql("select year, team,"
                "count(case when result = 1 then 1 end) as total_tie,"
                "count(case when result = 0 then 1 end) as total_loss,"
                "sum(result) as total_points from ipl "
-               "group by year, team order by year asc, total_points desc, total_won desc")
+               "group by year, team "
+               "order by year asc, total_points desc, total_won desc")
 
 final.show(truncate=False)
 
