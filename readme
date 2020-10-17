@@ -1,0 +1,44 @@
+Problem Statement: Generate year wise points-table for IPL using Spark
+Scope:
+- Make use of attached CSV for data ingestion
+- Outcome should be a single CSV file with points table for each year
+- Points table should contain year, team name, no. of matches played, no. of matches won, no. of matches lost, no. of matches tied, overall points ordered by year, points
+- Points Calculation:
+  - Winning team gets 2 points
+  - In case of tied match where there is no super over both teams get 1 point each
+  - In case of tied match with super over, winning team 2 points
+- Points Table:
+  - In case of equal points, team with more wins is higher in the order
+  - In case of equal points and equal wins, order doesn’t necessarily match
+- Team names have changed over years, while generating points table use the latest names of the teams. Eg: Deccan Charges is changed to SunRisers Hyderabad, Delhi Dare Devils is changed to Delhi Capitals.
+
+Approach:
+
+In order to get the desired result, we need to do following transformations on the input dataframe
+1. First of all we need to consider only those columns which are important for us in this analysis.
+  a. Year
+  b. Match_Info: It is because this data contains result of eliminators, qualifiers and finals, we'll have to ignore them
+  c. Match_Team
+  d. Match_Result
+2. Filtered the data on basis of:
+  a. Match_Info: ignoring knock outs
+  b. Match_Result: ignoring which have not been played yet
+3. Splitting the Match_Team into two columns so that we can do transformations separately
+4. Similarly, cleaning the Match_Result - as we only require who won (not by how much). We also considered the abandoned matches
+5. After all this, we have to make the data consistent (across all three columns - Team1, Team2, and Result). Things we need to take care of:
+  a. Case sensitivity
+  b. Old names to new names
+  c. Spell checks
+  d. There are some cases where instead of team name only city name is provided, we need to take care of that too.
+6. Finally, the data is prepared and we can get the result. For this, these were the steps I followed
+  a. Each row was divided into two rows. This was the final schema: year - team name - ('2' if they won, '1' if match was abandoned, '0' if they lost)
+  b. Used SQL statement to finally get the required numbers.
+    i. Group by year and team
+    ii. count(team) - for total matches
+    iii. count(result if it was 2) - for total won
+    iv. count(result if it was 1) - for total tie
+    v.  count(result if it was 0) - for total losses
+    vi. sum(result) - for total_points
+    vii. Ordered by year(asc), total_points(desc) and total_won(desc)
+    
+  We had the desired result!
