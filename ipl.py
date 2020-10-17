@@ -1,6 +1,6 @@
 from pyspark import SparkConf
 from pyspark.context import SparkContext
-from pyspark.sql import Row, SparkSession, functions, DataFrameWriter
+from pyspark.sql import Row, SparkSession, functions
 
 # creating SparkContext
 sc = SparkContext.getOrCreate(SparkConf())
@@ -76,9 +76,8 @@ df2 = df.withColumn('result', functions.
 df = df1.union(df2)
 df.show()
 
+# final result
 df.createOrReplaceTempView("ipl")
-dt = sp.sql("select year, new_result, count(*) from ipl where year = 2008 group by year, new_result order by year")
-
 final = sp.sql("select year, team,"
                "count(team) as total_matches,"
                "count(case when result = 2 then 1 end) as total_won,"
@@ -88,3 +87,6 @@ final = sp.sql("select year, team,"
                "group by year, team order by year asc, total_points desc, total_won desc")
 
 final.show(truncate=False)
+
+# saving file to csv
+final.toPandas().to_csv('output.csv', index=False)
